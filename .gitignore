@@ -98,6 +98,7 @@ dmypy.json
 # input data and models
 input/
 models/
+.idea/
 
 # Data files
 *.csv
