@@ -1,5 +1,6 @@
 from sklearn import preprocessing
 import pandas as pd
+from sklearn import linear_model
 
 """
 Approaches:
@@ -17,18 +18,24 @@ class CategoricalFeatures:
         handle_na: True/False
         """
         self.df = df
-        self.output_df = self.df.copy(deep=True)
         self.categorical_features = categorical_features
         self.enc_type =  encoding_type
         self.handle_na = handle_na
         self.label_encoders = dict() # store LabelEncoder object for later encoding testing data
         self.binary_encoders = dict() # store LabelBinarizer object for later encode testing data
+        self.ohe = None
 
         # Impute Nan with dummy value: works for LabelEncoding only
         if self.handle_na:
             for col in self.categorical_features:
                 self.df.loc[:, col] = self.df.loc[:, col].astype(str).fillna("-9999999")
+        # Deep copy df to the output
+        self.output_df = self.df.copy(deep=True)
 
+    def _one_hot_encoding(self):
+        self.ohe = preprocessing.OneHotEncoder()
+        self.ohe.fit(self.df[self.categorical_features].values)
+        return self.ohe.transform(self.df[self.categorical_features].values)
 
     def _label_encoding(self):
         for col in self.categorical_features:
@@ -59,6 +66,9 @@ class CategoricalFeatures:
             return self._label_encoding()
         elif self.enc_type == 'binary':
             return self._label_binarization()
+        elif self.enc_type == 'ohe':
+            return self._one_hot_encoding()
+
         else:
             raise Exception("Encoding type not understood")
 
@@ -95,10 +105,18 @@ if __name__ == "__main__":
     # Step 1: load datasets(train and test)
     df_train = pd.read_csv("../input/categorical_2_train.csv") #.head(500)
     df_test = pd.read_csv("../input/categorical_2_test.csv")
+    # Load submission file
+    df_sub = pd.read_csv("../input/categorical_2_sample_sub.csv")
+
+    df_train = df_train.sample(frac=1).reset_index(drop=True)
+    df_test = df_test.sample(frac=1).reset_index(drop=True)
 
     # Step 2: keep track on their respective indices
-    df_train_index = df_train["id"].values
-    df_test_index = df_test["id"].values
+    # df_train_index = df_train["id"].values
+    # df_test_index = df_test["id"].values
+    df_train_len = len(df_train)
+    df_test_len = len(df_test)
+
 
     # Step 3: Concatenate train and test
     df_test['target'] = -1   # fake target column bz test data does not have
@@ -110,18 +128,31 @@ if __name__ == "__main__":
     # Step 5: Transform label for the full data
     cat_features = CategoricalFeatures(full_data,
                                        categorical_features=cols,
-                                       encoding_type='label',
+                                       encoding_type='ohe',
                                        handle_na=True)
     # Step 6: Get the final transformed dataset(train and test)
     full_data = cat_features.fit_transform()
 
     # Step 7: Split train and test set
-    df_train = full_data[full_data['id'].isin(df_train_index)].reset_index(drop=True)
-    df_test = full_data[full_data['id'].isin(df_test_index)].reset_index(drop=True)
+    # df_train = full_data[full_data['id'].isin(df_train_index)].reset_index(drop=True)
+    # df_test = full_data[full_data['id'].isin(df_test_index)].reset_index(drop=True)
+    X_train = full_data[:df_train_len, :]
+    X_test = full_data[df_train_len:, :]
 
     # Step 8: Remove the fake target column in test data
-    df_test = df_test.drop('target', axis=1)
+    #df_test = df_test.drop('target', axis=1)
 
-    print(df_train.shape)
-    print(df_test.shape)
+    # Train model
+    clf = linear_model.LogisticRegression()
+    clf.fit(X_train, df_train['target'].values)
+    preds = clf.predict_proba(X_test)[:, 1]
+    df_sub.loc[:, 'target'] = preds
+    df_sub.round(4)
+
+    # Submit
+    df_sub.to_csv("../input/categorical_2_sample_sub.csv", index=False)
+
+
+
+
 
