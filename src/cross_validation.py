@@ -42,8 +42,8 @@ class CrossValidation:
                 raise Exception("Only one unique value found")
             elif unique_values > 1:  # Means "multi" class classification
                 sk_fold = model_selection.StratifiedKFold(n_splits=self.no_folds,
-                                                     shuffle=False,
-                                                     random_state=self.random_state)  # Random state has no effect
+                                                          shuffle=False,
+                                                          random_state=self.random_state)  # Random state has no effect
 
                 # Create Fold and Train/Val indices
                 for fold, (train_index, val_index) in enumerate(sk_fold.split(X=self.dataframe, y=self.dataframe.target.values)):

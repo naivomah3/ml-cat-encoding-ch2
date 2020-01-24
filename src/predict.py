@@ -25,7 +25,7 @@ def predict():
         # Walk through columns to encode them all
         for (col, label_encoder) in encoders:
             # Transform col
-            df.loc[:, col] = label_encoder.transform(df[col].values.tolist())
+            df.loc[:, col] = label_encoder.fit_transform(df[col].values.tolist())
 
         # Load classifier
         clf = joblib.load(os.path.join('models', f"{MODEL}_{FOLD}.pkl"))
