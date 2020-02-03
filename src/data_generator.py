@@ -71,7 +71,7 @@ def data_loader(frames_path=None,
                 is_resizable=False,
                 ):
 
-    # X is of depth=3, Y is of depth=n_classes
+    # X is of depth=3, Y of depth=n_classes
     X_test, Y_test = list(), list()
     for file_name in fnames:
         X_test.append(get_frame(os.path.join(frames_path, file_name), input_h, input_w, is_resizable))

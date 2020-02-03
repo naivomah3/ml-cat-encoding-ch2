@@ -16,7 +16,6 @@ MASKS_VAL_PATH = os.environ.get("MASKS_VAL_PATH")
 MODELS_OUT_PATH = os.environ.get("MODELS_OUT_PATH")
 
 if __name__ == '__main__':
-
     # Image generator
     train_generator = data_generator(frames_path=FRAMES_TRAIN_PATH,
                                        masks_path=MASKS_TRAIN_PATH,
@@ -39,9 +38,9 @@ if __name__ == '__main__':
     # Save model
     model_checkpoint_path = os.path.join(MODELS_OUT_PATH, f"unet_train_on_{date.today().strftime('%m_%d_%y')}.h5")
 
-    # callback 1: save history
+    # callback 1: saving history
     cb_csvlogger = CSVLogger(os.path.join(MODELS_OUT_PATH, f"unet_log_on_{date.today().strftime('%m_%d_%y')}.csv"), append=True)
-    # callback 2: save model
+    # callback 2: saving model
     cb_checkpoint = ModelCheckpoint(model_checkpoint_path,
                                     monitor='dice',
                                     verbose=1,

@@ -61,9 +61,10 @@ if __name__ == '__main__':
     test_masks = np.argmax(test_masks, axis=3)
     predicted_masks = np.argmax(predicted_masks, axis=3)
 
-    print(np.unique(test_masks))
-    print(np.unique(predicted_masks))
-
+    #print(predicted_masks.shape)
+    #print(test_masks.shape)
+    #print(np.unique(test_masks))
+    #print(np.unique(predicted_masks))
 
     # Save Frames, GroundTruth and Predicted masks
     for i in range(test_frames.shape[0]):
@@ -78,11 +79,6 @@ if __name__ == '__main__':
         cv2.imwrite(os.path.join(MASKS_PREDICT_OUT_PATH, fname + '.png'),
                     color_img(predicted_masks[i], 3))
 
-    print(predicted_masks.shape)
-    print(test_masks.shape)
-
-
-    # Save predict
 
 
 
